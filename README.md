@@ -1,1 +1,1 @@
-# smart-document-redaction
+# Smart Document Redaction
