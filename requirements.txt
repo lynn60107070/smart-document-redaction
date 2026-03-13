@@ -1,0 +1,10 @@
+# Sample requirements for now, put under sections as you add more  (like kairos)
+
+streamlit
+spacy
+pymupdf
+pdfplumber
+pandas
+numpy
+scikit-learn
+matplotlib
