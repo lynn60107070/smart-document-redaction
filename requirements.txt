@@ -4,7 +4,4 @@ streamlit
 spacy
 pymupdf
 pdfplumber
-pandas
-numpy
-scikit-learn
-matplotlib
+pytest
