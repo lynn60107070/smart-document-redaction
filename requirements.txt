@@ -1,5 +1,6 @@
 # Use a project venv to avoid spaCy/Pydantic conflicts with other global packages.
-# See ENVIRONMENT.txt in this folder.
+# PyTorch is not a project dependency; if you see a pynvml/nvidia warning, use a
+# clean venv, or: pip install nvidia-ml-py && pip uninstall pynvml (only if you use PyTorch).
 
 streamlit
 # spaCy 3.7+ is required for Pydantic v2 compatibility (model loading from disk).
