@@ -1,7 +1,23 @@
-# Sample requirements for now, put under sections as you add more  (like kairos)
+# Use a project virtual environment to avoid dependency conflicts.
 
+# Core app
 streamlit
-spacy
+
+# NLP (compatible with Pydantic v2)
+spacy>=3.7.0,<4
+
+# PDF processing
 pymupdf
 pdfplumber
+
+# Data processing
+pandas
+numpy
+
+# ML / utilities
+tqdm
+scikit-learn
+matplotlib
+
+# Testing
 pytest
