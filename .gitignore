@@ -1,1 +1,60 @@
-    
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# Jupyter
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE (optional: remove .vscode if you share workspace settings)
+.idea/
+*.swp
+*.swo
+
+# Optional: ignore re-generated evaluation plots/metrics under model/ (spaCy weights stay tracked)
+# model/ner_model/artifacts/
+
+# Optional: ignore all processed data (uncomment if you do not commit large CSVs/JSON)
+# data/processed/*.csv
+# data/processed/*.json
+# data/processed/*.jsonl
+
+# Logs
+*.log
+logs/

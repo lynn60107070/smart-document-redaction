@@ -1,10 +1,13 @@
-# Sample requirements for now, put under sections as you add more  (like kairos)
+# Use a project venv to avoid spaCy/Pydantic conflicts with other global packages.
+# See ENVIRONMENT.txt in this folder.
 
 streamlit
-spacy
+# spaCy 3.7+ is required for Pydantic v2 compatibility (model loading from disk).
+spacy>=3.7.0,<4
 pymupdf
 pdfplumber
 pandas
 numpy
+tqdm
 scikit-learn
 matplotlib
