@@ -1,4 +1,8 @@
 # Use a project virtual environment to avoid dependency conflicts.
+# spaCy 3.7+ is required for Pydantic v2 compatibility.
+# PyTorch is not a project dependency; if you see a pynvml/nvidia warning,
+# use a clean venv or:
+# pip install nvidia-ml-py && pip uninstall pynvml (only if you use PyTorch).
 
 # Core app
 streamlit

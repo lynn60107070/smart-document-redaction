@@ -12,6 +12,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import warnings
+warnings.filterwarnings("ignore")
+
+
 from spacy.language import Language
 
 # Allow `python ai_model/entity_detector.py` from repo root
