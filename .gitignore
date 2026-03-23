@@ -1,1 +1,63 @@
-    
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Packaging
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# Jupyter
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Logs & temp files
+*.log
+*.tmp
+logs/
+
+# Optional: ignore re-generated evaluation outputs
+# model/ner_model/artifacts/
+
+# Optional: ignore processed data (uncomment if needed)
+# data/processed/*.csv
+# data/processed/*.json
+# data/processed/*.jsonl
