@@ -76,7 +76,7 @@ function ReviewContent() {
   const [zoom, setZoom] = useState(100);
   const [error, setError] = useState<string | null>(null);
   const [isRedacting, setIsRedacting] = useState(false);
-  const textPreviewRef = useRef<HTMLElement | null>(null);
+  const textPreviewRef = useRef<HTMLPreElement | null>(null);
 
   if (!session) {
     return null;
