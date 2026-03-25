@@ -54,6 +54,11 @@ desktop.ini
 *.tmp
 logs/
 
+# Node / Next.js
+node_modules/
+.next/
+out/
+
 # Optional: ignore re-generated evaluation outputs
 # model/ner_model/artifacts/
 
