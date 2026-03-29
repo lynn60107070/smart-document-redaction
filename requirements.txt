@@ -6,6 +6,9 @@
 
 # Core app
 streamlit
+fastapi
+uvicorn
+python-multipart
 
 # NLP (compatible with Pydantic v2)
 spacy>=3.7.0,<4
@@ -25,3 +28,4 @@ matplotlib
 
 # Testing
 pytest
+httpx

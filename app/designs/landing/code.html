@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Redactly | Secure Document Redaction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "on-primary": "#ffffff",
+                "on-error": "#ffffff",
+                "surface-container": "#ebeef0",
+                "primary": "#001735",
+                "on-surface-variant": "#43474f",
+                "outline-variant": "#c4c6d0",
+                "primary-fixed": "#d6e3ff",
+                "tertiary-fixed-dim": "#ffb3ad",
+                "on-surface": "#181c1e",
+                "on-primary-fixed": "#001b3c",
+                "background": "#f7fafc",
+                "on-primary-container": "#7a94c0",
+                "secondary-container": "#d6e0f6",
+                "on-background": "#181c1e",
+                "secondary-fixed-dim": "#bdc7dc",
+                "primary-fixed-dim": "#adc7f7",
+                "primary-container": "#0d2c52",
+                "error": "#ba1a1a",
+                "surface-container-lowest": "#ffffff",
+                "inverse-primary": "#adc7f7",
+                "secondary-fixed": "#d9e3f9",
+                "on-tertiary-fixed-variant": "#930013",
+                "tertiary-container": "#600008",
+                "secondary": "#555f71",
+                "on-secondary-fixed-variant": "#3d4759",
+                "tertiary": "#390003",
+                "surface-dim": "#d7dadc",
+                "surface-bright": "#f7fafc",
+                "on-secondary-container": "#596376",
+                "tertiary-fixed": "#ffdad7",
+                "on-tertiary-fixed": "#410004",
+                "on-primary-fixed-variant": "#2d476f",
+                "on-tertiary-container": "#ff5a56",
+                "inverse-surface": "#2d3133",
+                "surface-tint": "#455f88",
+                "on-secondary-fixed": "#121c2c",
+                "surface-variant": "#e0e3e5",
+                "surface-container-highest": "#e0e3e5",
+                "surface-container-high": "#e5e9eb",
+                "inverse-on-surface": "#eef1f3",
+                "surface": "#f7fafc",
+                "on-tertiary": "#ffffff",
+                "error-container": "#ffdad6",
+                "surface-container-low": "#f1f4f6",
+                "on-secondary": "#ffffff",
+                "on-error-container": "#93000a",
+                "outline": "#747780"
+              },
+              fontFamily: {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<nav class="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/15 dark:border-slate-800/15 shadow-sm dark:shadow-none docked full-width top-0 z-50 fixed">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-full">
+<div class="text-xl font-extrabold tracking-tight text-blue-950 dark:text-white">Redactly</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">How It Works</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">About</a>
+<button class="bg-primary hover:opacity-90 text-on-primary px-5 py-2 rounded-md font-semibold transition-all active:scale-95 duration-150 ease-in-out">Start New</button>
+</div>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+<!-- SideNavBar (Suppressed for landing/upload focus as per "The Destination Rule") -->
+<main class="pt-24 pb-20">
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center py-12 lg:py-20">
+<div class="space-y-8">
+<div>
+<span class="label-md text-primary font-bold tracking-[0.1em] uppercase text-xs mb-4 block">Privacy First Intelligence</span>
+<h1 class="text-5xl lg:text-7xl font-extrabold text-primary leading-[1.1] tracking-tight">
+                        Secure your <br/>sensitive data.
+                    </h1>
+</div>
+<p class="text-lg text-secondary leading-relaxed max-w-lg">
+                    Redactly uses professional-grade AI to scan, identify, and permanently obscure sensitive information from your documents. Automated compliance with the precision of a curator.
+                </p>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="text-sm font-semibold text-primary">Bank-grade security</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-sm font-semibold text-primary">Instant detection</span>
+</div>
+</div>
+</div>
+<!-- Upload Area: Glassmorphism Bento Cell -->
+<div class="relative">
+<div class="absolute -inset-4 bg-primary-fixed/30 blur-3xl rounded-full opacity-50"></div>
+<div class="relative bg-surface-container-lowest p-8 lg:p-12 rounded-xl shadow-sm border border-outline-variant/10">
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-12 flex flex-col items-center justify-center text-center space-y-4 hover:bg-surface-container-low transition-colors group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-primary">Drop your PDF here</h3>
+<p class="text-sm text-on-secondary-container mt-1">or click to browse from your device</p>
+</div>
+<div class="pt-4">
+<button class="bg-primary text-on-primary px-8 py-3 rounded-md font-bold shadow-lg transition-all hover:translate-y-[-2px] active:translate-y-0">
+                                Select Document
+                            </button>
+</div>
+<p class="text-[10px] text-outline uppercase tracking-widest pt-4">Max file size: 50MB</p>
+</div>
+</div>
+</div>
+</section>
+<!-- The 3-Step Process (Asymmetric Layout) -->
+<section class="bg-surface-container py-24">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+<div class="max-w-xl">
+<h2 class="text-3xl font-bold text-primary mb-4">The Redaction Lifecycle</h2>
+<p class="text-secondary">Our streamlined workflow ensures no metadata is left behind. We treat every document as a high-stakes asset.</p>
+</div>
+<div class="hidden md:block h-[1px] flex-grow bg-outline-variant/30 mx-12 mb-4"></div>
+<div class="text-right">
+<span class="text-6xl font-extrabold text-primary/5">01—03</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Step 1 -->
+<div class="space-y-6">
+<div class="flex items-baseline gap-4">
+<span class="text-4xl font-black text-primary/10 font-headline">01</span>
+<h3 class="text-xl font-bold text-primary">Upload</h3>
+</div>
+<div class="aspect-video bg-surface-container-lowest rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="abstract artistic representation of document upload with glowing blue lines and dark professional background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXe2cLwGRRb88rQAt74YheVYMcyCRtFPdhDB9szPEPABDSLEimnwoxjOOTcdqz0hO-hZSBwUUbS39bb38VJ2m2b40RmW_OjYvDSSOvTpA-mN2kbR2NzPgBeKy1hJbQPA0okkqaYOKABL-NJ6f-HTmLH-80XPjDV_Wi75Ej_arMqpgnv7P8e5sMZmbquA0HscA3BYX2vzsxHHkbwV96MCV66tpXZ1kFTMFryOhzVuq6ETwZhjUC1WB558yva5WCwcaYnA0NCGBeLcFe"/>
+<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+<div class="absolute bottom-4 left-4">
+<span class="material-symbols-outlined text-white text-3xl">upload_file</span>
+</div>
+</div>
+<p class="text-sm text-secondary leading-relaxed">Securely ingest PDF, DOCX, or scan files. Our system encrypts the stream instantly upon receipt.</p>
+</div>
+<!-- Step 2 -->
+<div class="space-y-6 md:mt-12">
+<div class="flex items-baseline gap-4">
+<span class="text-4xl font-black text-primary/10 font-headline">02</span>
+<h3 class="text-xl font-bold text-primary">Review</h3>
+</div>
+<div class="aspect-video bg-surface-container-lowest rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="close up of a modern digital interface showing highlighted data entities in a clean navy and white layout" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAct3N3Zie38GUeI1ODZETumRvF-KhPjM-iV69pT-fGAFUnjFDVefhrM8JboIUEbKJku5HTkkWrTFdSiABn1HH05hoD6yRXdKt_uezIriFjJGfdrdar7cWhsgD6rdB4NOfPiN4tsGH7MlB-gtkpxNzyJqj-963E7-pJ_ad6I3u4cznXzeLvReM2gA-z1sUhBKcGAxIU_ncSY2uwyLvYlgImWqGqaiX2sctbiOXPSq9NYBCBY_empTGvQ3IroepjzoU3zom9kScjEe27"/>
+<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+<div class="absolute bottom-4 left-4">
+<span class="material-symbols-outlined text-white text-3xl">visibility_off</span>
+</div>
+</div>
+<p class="text-sm text-secondary leading-relaxed">AI automatically tags PII, PHI, and sensitive entities. You maintain final editorial control over every mark.</p>
+</div>
+<!-- Step 3 -->
+<div class="space-y-6 md:mt-24">
+<div class="flex items-baseline gap-4">
+<span class="text-4xl font-black text-primary/10 font-headline">03</span>
+<h3 class="text-xl font-bold text-primary">Download</h3>
+</div>
+<div class="aspect-video bg-surface-container-lowest rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="person holding a tablet showing a completed document with secure redaction blocks in a high-end office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa3wIY_Gt2SKbAj-CxZWVRuiOyhyK2ZmBtHArc9k5J00PlJ0EwgaGzaJ7sptbNpM9vVxFwMfCDmXjCrItT8gNxqLT5lJhKnPSXqP3n5r8EdVHICt-dyni1-pwalygtK_Gkp1SRV6NKnddMDz8XgpWqdlB0BihJt-IkZ6Yyj54_KlMjCQOpI4Fx1qIJSkqnZ9tR_2Yxq3FkCDMby2dMWO88Wte75aXi8SMrxTqXy654-R7fV0U2LxU7DefSqvDW34QSWjuqPty7O22R"/>
+<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+<div class="absolute bottom-4 left-4">
+<span class="material-symbols-outlined text-white text-3xl">file_download</span>
+</div>
+</div>
+<p class="text-sm text-secondary leading-relaxed">Export a flattened, sanitised PDF with all metadata scrubbed. Ready for public disclosure or legal discovery.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Compliance & Trust Bento Section -->
+<section class="max-w-7xl mx-auto px-6 py-24">
+<div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-auto md:h-[400px]">
+<div class="md:col-span-2 md:row-span-2 bg-primary p-10 rounded-xl flex flex-col justify-end text-on-primary">
+<h3 class="text-3xl font-bold mb-4">Enterprise Grade by Default</h3>
+<p class="text-primary-fixed-dim max-w-sm">We adhere to SOC2 Type II, HIPAA, and GDPR standards. Your documents never leave our secure VPC and are deleted after 24 hours.</p>
+</div>
+<div class="bg-surface-container-high p-8 rounded-xl flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-4" data-weight="fill">verified</span>
+<h4 class="font-bold text-primary">Certified Security</h4>
+</div>
+<div class="bg-secondary-container p-8 rounded-xl flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-primary text-4xl mb-4">history_edu</span>
+<h4 class="font-bold text-primary">Audit Ready</h4>
+</div>
+<div class="md:col-span-2 bg-white p-8 rounded-xl flex items-center justify-between border border-outline-variant/10 shadow-sm">
+<div>
+<h4 class="font-bold text-primary text-xl">Auto-Detection API</h4>
+<p class="text-sm text-secondary">Integrate redaction into your own app flow.</p>
+</div>
+<span class="material-symbols-outlined text-primary text-2xl">arrow_forward</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-primary text-on-primary py-12">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="text-2xl font-extrabold tracking-tight">Redactly</div>
+<div class="flex gap-8 text-sm font-medium opacity-70">
+<a class="hover:opacity-100 transition-opacity" href="#">Terms of Service</a>
+<a class="hover:opacity-100 transition-opacity" href="#">Privacy Policy</a>
+<a class="hover:opacity-100 transition-opacity" href="#">Contact</a>
+</div>
+<div class="text-xs opacity-50 font-label">
+                © 2024 Redactly Intelligence. All Rights Reserved.
+            </div>
+</div>
+</footer>
+</body></html>

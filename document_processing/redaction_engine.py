@@ -37,11 +37,18 @@ def redact_pdf(
 
     doc = open_pdf(pdf_source)
     try:
+        pages_to_apply: set[int] = set()
         for item in mapped:
             page_index = int(item["page"])  # type: ignore[index]
             rect = fitz.Rect(item["rect"])  # type: ignore[index]
             page = doc.load_page(page_index)
-            page.add_redact_annot(rect)
+            annot = page.add_redact_annot(rect, fill=(0, 0, 0))
+            if annot is not None:
+                annot.update(fill_color=(0, 0, 0))
+            pages_to_apply.add(page_index)
+
+        for page_index in sorted(pages_to_apply):
+            page = doc.load_page(page_index)
             page.apply_redactions()
 
         if output_path:
