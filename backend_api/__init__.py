@@ -1,1 +1,1 @@
-"""Thin API layer for the redaction MVP."""
+"""FastAPI package: ``main`` (routes), ``service`` (NER/PDF orchestration), ``store`` (temp files)."""

@@ -1,3 +1,5 @@
+"""Pytest bootstrap: put the repository root on ``sys.path`` for package imports."""
+
 import os
 import sys
 

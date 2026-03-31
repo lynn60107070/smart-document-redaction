@@ -1,3 +1,12 @@
+"""
+Core orchestration for the API: load the spaCy pipeline once, run PDF or text
+analysis, and apply redactions.
+
+PDF flow: ``extract_text`` → ``detect_entities`` → ``map_entities`` → optional
+``redact_pdf`` / page rasterization. Text flow: ``detect_entities`` on the raw
+string → ``apply_text_redactions`` (length-obscuring masks, no geometry).
+"""
+
 from __future__ import annotations
 
 import hashlib
@@ -16,10 +25,12 @@ from document_processing.text_extractor import extract_text
 
 @lru_cache(maxsize=1)
 def get_nlp():
+    """Return the shared spaCy ``Language`` pipeline (one load per process)."""
     return load_ner_model()
 
 
 def analyze_plain_text(text: str) -> dict[str, Any]:
+    """Run NER+regex on ``text``; return dict aligned with PDF analyze (no pages/images)."""
     stripped = text.strip()
     if not stripped:
         raise ValueError("Text is empty.")
@@ -50,7 +61,7 @@ def length_obscuring_text_mask(ordinal: int, start: int, end: int) -> str:
 
 
 def apply_text_redactions(full_text: str, entities: list[dict[str, Any]]) -> str:
-    """Replace enabled entity spans with length-obscuring block masks."""
+    """Replace enabled spans with ``length_obscuring_text_mask`` after merging overlaps (left-to-right build)."""
     spans: list[tuple[int, int]] = []
     for entity in entities:
         if not entity.get("enabled", True):
@@ -80,6 +91,11 @@ def apply_text_redactions(full_text: str, entities: list[dict[str, Any]]) -> str
 
 
 def analyze_pdf(pdf_bytes: bytes) -> dict[str, Any]:
+    """
+    Extract text, detect entities, map to page rectangles, and collect page dimensions.
+
+    Returns keys: ``text``, ``pageCount``, ``entities``, ``mappedEntities``, ``pages``.
+    """
     extracted = extract_text(pdf_bytes)
     entities = detect_entities(get_nlp(), extracted.text)
     mapped = map_entities(extracted, entities)
@@ -130,6 +146,7 @@ def analyze_pdf(pdf_bytes: bytes) -> dict[str, Any]:
 
 
 def apply_redactions(pdf_bytes: bytes, entities: list[dict[str, Any]]) -> bytes:
+    """Apply ``redact_pdf``; ``entities`` should be enabled-only dicts as produced by the redact route."""
     redacted = redact_pdf(pdf_bytes, entities)
     if isinstance(redacted, bytes):
         return redacted
@@ -137,6 +154,7 @@ def apply_redactions(pdf_bytes: bytes, entities: list[dict[str, Any]]) -> bytes:
 
 
 def render_page_image(pdf_bytes: bytes, page_index: int, zoom: float = 1.4) -> bytes:
+    """Rasterize one PDF page to PNG bytes (for browser preview)."""
     doc = open_pdf(pdf_bytes)
     try:
         if page_index < 0 or page_index >= doc.page_count:

@@ -1,3 +1,11 @@
+"""
+Bridge from NER character offsets to PDF coordinates.
+
+Each ``WordBox`` in ``extracted.word_index`` overlaps an entity ``[start,end)``
+inclusive-exclusive on the global string; hits are merged per page with
+``merge_rects`` so multi-word entities become one redaction rectangle.
+"""
+
 from __future__ import annotations
 
 from typing import Dict, Iterable, List, Sequence

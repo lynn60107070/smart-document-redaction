@@ -1,3 +1,9 @@
+"""
+Build a single string and global ``start``/``end`` indices from a PDF so NER spans
+match ``extract_text(...).text``. Words are ordered by PyMuPDF block/line metadata;
+``PAGE_SEPARATOR`` joins pages (see ``utils.constants``).
+"""
+
 from __future__ import annotations
 
 from typing import List, Tuple, Union, IO
@@ -29,7 +35,7 @@ def extract_text(pdf_file: Union[str, bytes, IO[bytes]]) -> ExtractedDocument:
             page = doc.load_page(page_index)
             words = page.get_text("words")
 
-            # words: (x0, y0, x1, y1, text, block_no, line_no, word_no)
+            # PyMuPDF "words" tuples: x0,y0,x1,y1,text, block,line, word index
             words_sorted = sorted(words, key=lambda w: (w[5], w[6], w[7]))
 
             page_text_parts: List[str] = []

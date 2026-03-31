@@ -34,6 +34,7 @@ STOPWORDS = {"email", "contact"}
 
 
 def detect_regex(text: str) -> list[dict[str, Any]]:
+    """Scan ``text`` for ``REGEX_PATTERNS`` (email, phone-like, card-like, ID-like)."""
     results: list[dict[str, Any]] = []
     for label, pattern in REGEX_PATTERNS.items():
         for m in re.finditer(pattern, text):
@@ -51,6 +52,7 @@ def detect_regex(text: str) -> list[dict[str, Any]]:
 def merge_entities(
     ner: list[dict[str, Any]], regex: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
+    """Sort by start then prefer longer spans; drop overlaps so one winner per region."""
     all_e = ner + regex
     all_e = sorted(all_e, key=lambda x: (x["start"], -x["end"]))
     final: list[dict[str, Any]] = []
@@ -63,6 +65,7 @@ def merge_entities(
 
 
 def detect_entities(nlp: Language, text: str) -> list[dict[str, Any]]:
+    """Run spaCy NER, filter trivial spans, add regex hits, return merged ``{text,label,start,end}`` dicts."""
     doc = nlp(text)
     ner_entities: list[dict[str, Any]] = []
     for ent in doc.ents:
@@ -83,6 +86,7 @@ def detect_entities(nlp: Language, text: str) -> list[dict[str, Any]]:
 
 
 def redact(nlp: Language, text: str) -> str:
+    """CLI/demo helper: replace spans with ``[REDACTED_LABEL]`` (not used by the web API)."""
     ents = detect_entities(nlp, text)
     for e in sorted(ents, key=lambda x: x["start"], reverse=True):
         text = text[: e["start"]] + f"[REDACTED_{e['label']}]" + text[e["end"] :]

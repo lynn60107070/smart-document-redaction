@@ -1,3 +1,12 @@
+"""
+Ephemeral PDF storage for the API.
+
+Uploads and redacted outputs are written under the OS temp directory (see
+``TempDocumentStore``). Metadata lives in memory; binary files are removed when
+entries pass ``SESSION_TTL_SECONDS`` (1 hour) and cleanup runs on the next
+mutating operation. There is no long-term database.
+"""
+
 from __future__ import annotations
 
 import tempfile
@@ -29,6 +38,8 @@ class StoredOutput:
 
 
 class TempDocumentStore:
+    """Thread-safe store for uploaded PDFs and redacted PDF outputs on disk."""
+
     def __init__(self) -> None:
         self._root = Path(tempfile.gettempdir()) / "smart_redaction_api"
         self._root.mkdir(parents=True, exist_ok=True)
@@ -37,6 +48,7 @@ class TempDocumentStore:
         self._lock = Lock()
 
     def _cleanup_expired(self) -> None:
+        """Drop in-memory keys and unlink files older than ``SESSION_TTL_SECONDS``."""
         cutoff = time.time() - SESSION_TTL_SECONDS
 
         expired_docs = [

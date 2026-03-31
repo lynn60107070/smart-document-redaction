@@ -1,3 +1,11 @@
+"""
+Burn redaction annotations into a PDF using PyMuPDF.
+
+Spans are re-mapped with ``map_entities`` so coordinates stay consistent with
+``text_extractor`` output; only pages touched by at least one box get
+``apply_redactions`` (per-page in loop).
+"""
+
 from __future__ import annotations
 
 from typing import Dict, List, Sequence, Union, IO

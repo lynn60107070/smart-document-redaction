@@ -1,3 +1,11 @@
+"""
+Shared PDF primitives: open documents, typed extract structures, and rectangle
+merge helpers used by ``text_extractor`` and ``entity_mapper``.
+
+Falls back to local defaults if ``utils.constants`` is not importable (e.g. odd
+``PYTHONPATH`` when running a single script).
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

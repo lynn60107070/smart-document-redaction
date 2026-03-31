@@ -1,3 +1,14 @@
+"""
+FastAPI HTTP surface for the redaction app.
+
+Exposes JSON and file endpoints used by the Next.js client: PDF upload/analysis,
+plain-text analyze/redact (no PDF persisted for that path), entity re-mapping for
+preview overlays, and download / page-image helpers. Request bodies are defined
+with Pydantic models below; response shapes mirror ``web/lib/types.ts``.
+
+CORS is wide open for local dev—tighten ``CORSMiddleware`` for production.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
