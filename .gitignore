@@ -66,3 +66,6 @@ out/
 # data/processed/*.csv
 # data/processed/*.json
 # data/processed/*.jsonl
+
+# demo files
+demo_files/

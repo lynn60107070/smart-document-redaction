@@ -4,6 +4,36 @@ End-to-end pipeline to **detect sensitive entities** in PDFs (spaCy NER plus reg
 
 ---
 
+## What we identify and redact
+
+Detection is **hybrid**: a **custom spaCy NER model** (`model/ner_model`) proposes spans, and **regular expressions** add structured identifiers. Overlapping spans are merged so one region is not double-counted (`ai_model/entity_detector.py`).
+
+### Neural NER (model output)
+
+The fine-tuned pipeline is trained for **named-entity–style categories** aligned with the project dataset, including:
+
+- **PERSON** — people’s names  
+- **ORGANIZATION** — companies, institutions, and similar groups  
+- **LOCATION** — places (countries, cities, regions, etc.)  
+- **DATE** / **TIME** — calendar and clock-style expressions (as tagged in training)
+
+Exact behavior depends on what the model predicts on your PDF text; labels are normalized to uppercase in code.
+
+### Rule-based patterns (always run on extracted text)
+
+These are matched **in addition** to NER:
+
+- **EMAIL** — email addresses  
+- **PHONE** — long digit sequences (phone-like numbers; may match other numeric strings)  
+- **CREDIT_CARD** — 13–16 consecutive digits (card-like; can false-positive on other numbers)  
+- **ID** — 6–12 character alphanumeric tokens (generic “ID-like” strings; can false-positive on codes, order IDs, etc.)
+
+The detector **drops** NER spans whose text is only digits, and ignores trivial spans **email** and **contact** so generic words are not treated as entities.
+
+**Redaction** applies to whatever entities the UI (or API client) leaves **enabled** after review — you can turn detections off before exporting the PDF.
+
+---
+
 ## What’s in the stack
 
 | Layer | Technology |
