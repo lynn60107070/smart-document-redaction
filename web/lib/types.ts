@@ -1,5 +1,7 @@
 export type EntitySource = "model" | "manual";
 
+export type InputMode = "pdf" | "text";
+
 export type RedactionEntity = {
   text: string;
   label: string;
@@ -28,6 +30,7 @@ export type PreviewMappedEntity = {
 };
 
 export type AnalyzeResponse = {
+  inputMode: InputMode;
   documentId: string;
   filename: string;
   text: string;
@@ -37,7 +40,8 @@ export type AnalyzeResponse = {
   pages: PreviewPage[];
 };
 
-export type RedactResponse = {
+export type PdfRedactResult = {
+  kind: "pdf";
   filename: string;
   outputToken: string;
   downloadUrl: string;
@@ -46,7 +50,17 @@ export type RedactResponse = {
   summary: Record<string, number>;
 };
 
+export type TextRedactResult = {
+  kind: "text";
+  redactedText: string;
+  entityCount: number;
+  summary: Record<string, number>;
+};
+
+export type RedactionResult = PdfRedactResult | TextRedactResult;
+
 export type RedactionSession = {
+  inputMode: InputMode;
   documentId: string;
   filename: string;
   text: string;
@@ -54,5 +68,5 @@ export type RedactionSession = {
   entities: RedactionEntity[];
   mappedEntities: PreviewMappedEntity[];
   pages: PreviewPage[];
-  result: RedactResponse | null;
+  result: RedactionResult | null;
 };

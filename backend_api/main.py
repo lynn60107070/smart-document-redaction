@@ -8,7 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
-from .service import analyze_pdf, apply_redactions, render_page_image
+from .service import (
+    analyze_pdf,
+    analyze_plain_text,
+    apply_redactions,
+    apply_text_redactions,
+    render_page_image,
+)
 from .store import TempDocumentStore
 
 
@@ -28,6 +34,15 @@ class RedactRequest(BaseModel):
 
 class MapRequest(BaseModel):
     documentId: str
+    entities: list[EntityPayload]
+
+
+class AnalyzeTextRequest(BaseModel):
+    text: str
+
+
+class RedactTextRequest(BaseModel):
+    text: str
     entities: list[EntityPayload]
 
 
@@ -77,6 +92,7 @@ async def analyze(file: UploadFile = File(...)) -> dict[str, object]:
         for entity in analysis["entities"]
     ]
     return {
+        "inputMode": "pdf",
         "documentId": stored.document_id,
         "filename": stored.filename,
         "text": analysis["text"],
@@ -97,6 +113,35 @@ async def analyze(file: UploadFile = File(...)) -> dict[str, object]:
             }
             for page in analysis["pages"]
         ],
+    }
+
+
+@app.post("/api/analyze-text")
+def analyze_text_endpoint(request: AnalyzeTextRequest) -> dict[str, object]:
+    try:
+        analysis = analyze_plain_text(request.text)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to analyze text: {exc}") from exc
+
+    entities = [
+        {
+            **entity,
+            "enabled": True,
+            "source": "model",
+        }
+        for entity in analysis["entities"]
+    ]
+    return {
+        "inputMode": "text",
+        "documentId": "",
+        "filename": "pasted-text.txt",
+        "text": analysis["text"],
+        "pageCount": analysis["pageCount"],
+        "entities": entities,
+        "mappedEntities": [],
+        "pages": [],
     }
 
 
@@ -131,10 +176,42 @@ def redact(request: RedactRequest) -> dict[str, object]:
             summary[entity.label] = summary.get(entity.label, 0) + 1
 
     return {
+        "kind": "pdf",
         "filename": output.filename,
         "outputToken": output.token,
         "downloadUrl": f"http://127.0.0.1:8000/api/download/{output.token}",
         "previewBaseUrl": f"http://127.0.0.1:8000/api/outputs/{output.token}/pages",
+        "entityCount": sum(summary.values()),
+        "summary": summary,
+    }
+
+
+@app.post("/api/redact-text")
+def redact_text_endpoint(request: RedactTextRequest) -> dict[str, object]:
+    payload_entities = [
+        {
+            "text": entity.text,
+            "label": entity.label,
+            "start": entity.start,
+            "end": entity.end,
+            "enabled": entity.enabled,
+        }
+        for entity in request.entities
+    ]
+
+    try:
+        redacted = apply_text_redactions(request.text, payload_entities)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to redact text: {exc}") from exc
+
+    summary: dict[str, int] = {}
+    for entity in request.entities:
+        if entity.enabled:
+            summary[entity.label] = summary.get(entity.label, 0) + 1
+
+    return {
+        "kind": "text",
+        "redactedText": redacted,
         "entityCount": sum(summary.values()),
         "summary": summary,
     }

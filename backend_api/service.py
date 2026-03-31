@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from functools import lru_cache
 from typing import Any
 
@@ -16,6 +17,66 @@ from document_processing.text_extractor import extract_text
 @lru_cache(maxsize=1)
 def get_nlp():
     return load_ner_model()
+
+
+def analyze_plain_text(text: str) -> dict[str, Any]:
+    stripped = text.strip()
+    if not stripped:
+        raise ValueError("Text is empty.")
+    entities = detect_entities(get_nlp(), text)
+    return {
+        "text": text,
+        "pageCount": 1,
+        "entities": entities,
+        "mappedEntities": [],
+        "pages": [],
+    }
+
+
+def length_obscuring_text_mask(ordinal: int, start: int, end: int) -> str:
+    """
+    Deterministic redaction filler whose length does not match the original span,
+    so readers cannot infer secret length from the mask. Uses a hash of position
+    only (not the redacted substring) so the original text is not mixed into the
+    derivation.
+    """
+    digest = hashlib.blake2b(
+        f"{ordinal}\0{start}\0{end}".encode("utf-8"),
+        digest_size=32,
+    ).digest()
+    run_len = 7 + (digest[0] % 12)
+    palette = ("█", "■", "▓", "░")
+    return "".join(palette[digest[(j % 31) + 1] % 4] for j in range(run_len))
+
+
+def apply_text_redactions(full_text: str, entities: list[dict[str, Any]]) -> str:
+    """Replace enabled entity spans with length-obscuring block masks."""
+    spans: list[tuple[int, int]] = []
+    for entity in entities:
+        if not entity.get("enabled", True):
+            continue
+        start = int(entity["start"])
+        end = int(entity["end"])
+        if start < 0 or end > len(full_text) or end <= start:
+            continue
+        spans.append((start, end))
+    if not spans:
+        return full_text
+    spans.sort(key=lambda s: s[0])
+    merged: list[list[int]] = []
+    for s, e in spans:
+        if not merged or s > merged[-1][1]:
+            merged.append([s, e])
+        else:
+            merged[-1][1] = max(merged[-1][1], e)
+    parts: list[str] = []
+    last = 0
+    for i, (s, e) in enumerate(merged):
+        parts.append(full_text[last:s])
+        parts.append(length_obscuring_text_mask(i, s, e))
+        last = e
+    parts.append(full_text[last:])
+    return "".join(parts)
 
 
 def analyze_pdf(pdf_bytes: bytes) -> dict[str, Any]:

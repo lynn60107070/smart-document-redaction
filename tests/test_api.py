@@ -4,7 +4,9 @@ import fitz
 from fastapi.testclient import TestClient
 
 from backend_api import main as api_main
+from backend_api import service as api_service
 from backend_api.main import app
+from backend_api.service import length_obscuring_text_mask
 
 
 client = TestClient(app)
@@ -31,6 +33,87 @@ def test_analyze_rejects_non_pdf():
         files={"file": ("note.txt", b"hello", "text/plain")},
     )
     assert response.status_code == 400
+
+
+def test_analyze_text_rejects_empty():
+    response = client.post("/api/analyze-text", json={"text": "   \n"})
+    assert response.status_code == 400
+
+
+def test_analyze_text_flow(monkeypatch):
+    def fake_analyze_plain_text(text: str):
+        return {
+            "text": text,
+            "pageCount": 1,
+            "entities": [
+                {
+                    "text": "Secret",
+                    "label": "CUSTOM",
+                    "start": 0,
+                    "end": 6,
+                }
+            ],
+            "mappedEntities": [],
+            "pages": [],
+        }
+
+    monkeypatch.setattr(api_service, "analyze_plain_text", fake_analyze_plain_text)
+
+    analyze_response = client.post("/api/analyze-text", json={"text": "Secret note"})
+    assert analyze_response.status_code == 200
+    payload = analyze_response.json()
+    assert payload["inputMode"] == "text"
+    assert payload["documentId"] == ""
+    assert payload["entities"][0]["enabled"] is True
+    assert payload["mappedEntities"] == []
+
+
+def test_redact_text_flow():
+    response = client.post(
+        "/api/redact-text",
+        json={
+            "text": "Secret note",
+            "entities": [
+                {
+                    "text": "Secret",
+                    "label": "CUSTOM",
+                    "start": 0,
+                    "end": 6,
+                    "enabled": True,
+                    "source": "model",
+                }
+            ],
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["kind"] == "text"
+    mask = length_obscuring_text_mask(0, 0, 6)
+    assert body["redactedText"] == f"{mask} note"
+    assert len(mask) != 6
+    assert body["entityCount"] == 1
+
+
+def test_redact_text_disabled_entity_skips_redaction():
+    response = client.post(
+        "/api/redact-text",
+        json={
+            "text": "Secret note",
+            "entities": [
+                {
+                    "text": "Secret",
+                    "label": "CUSTOM",
+                    "start": 0,
+                    "end": 6,
+                    "enabled": False,
+                    "source": "model",
+                }
+            ],
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["redactedText"] == "Secret note"
+    assert response.json()["entityCount"] == 0
 
 
 def test_download_missing_token():
@@ -94,6 +177,7 @@ def test_analyze_and_redact_flow(monkeypatch):
     assert redact_response.status_code == 200
     redact_payload = redact_response.json()
     assert redact_payload["entityCount"] == 1
+    assert redact_payload.get("kind") == "pdf"
     assert "/api/download/" in redact_payload["downloadUrl"]
 
     download_path = redact_payload["downloadUrl"].replace("http://127.0.0.1:8000", "")

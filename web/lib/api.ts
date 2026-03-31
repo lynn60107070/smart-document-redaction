@@ -1,8 +1,9 @@
 import type {
   AnalyzeResponse,
+  PdfRedactResult,
   PreviewMappedEntity,
-  RedactResponse,
   RedactionEntity,
+  TextRedactResult,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -35,10 +36,22 @@ export async function analyzePdf(file: File): Promise<AnalyzeResponse> {
   return parseJson<AnalyzeResponse>(response);
 }
 
+export async function analyzeText(text: string): Promise<AnalyzeResponse> {
+  const response = await fetch(`${API_BASE}/api/analyze-text`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  return parseJson<AnalyzeResponse>(response);
+}
+
 export async function redactPdf(
   documentId: string,
   entities: RedactionEntity[]
-): Promise<RedactResponse> {
+): Promise<PdfRedactResult> {
   const response = await fetch(`${API_BASE}/api/redact`, {
     method: "POST",
     headers: {
@@ -50,7 +63,25 @@ export async function redactPdf(
     }),
   });
 
-  return parseJson<RedactResponse>(response);
+  return parseJson<PdfRedactResult>(response);
+}
+
+export async function redactText(
+  text: string,
+  entities: RedactionEntity[]
+): Promise<TextRedactResult> {
+  const response = await fetch(`${API_BASE}/api/redact-text`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text,
+      entities,
+    }),
+  });
+
+  return parseJson<TextRedactResult>(response);
 }
 
 export async function mapEntities(

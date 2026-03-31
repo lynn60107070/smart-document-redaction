@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { LoadingScreen } from "../../components/loading-screen";
 import { SessionGuard } from "../../components/session-guard";
-import { mapEntities, redactPdf } from "../../lib/api";
+import { mapEntities, redactPdf, redactText } from "../../lib/api";
 import { useSession } from "../../lib/session";
 import type { RedactionEntity } from "../../lib/types";
 
@@ -81,6 +81,8 @@ function ReviewContent() {
   if (!session) {
     return null;
   }
+
+  const isTextMode = session.inputMode === "text";
 
   const groupedEntities = useMemo(() => {
     const grouped = new Map<string, RedactionEntity[]>();
@@ -171,19 +173,28 @@ function ReviewContent() {
     ];
 
     setEntities(nextEntities);
-    void mapEntities(session.documentId, nextEntities)
-      .then((response) => {
-        setMappedEntities(response.mappedEntities);
-        setManualText("");
-        setManualLabel("CUSTOM");
-        setManualStart("");
-        setManualEnd("");
-        setManualQuery("");
-        setError(null);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : "Failed to map manual redaction.");
-      });
+    if (isTextMode) {
+      setManualText("");
+      setManualLabel("CUSTOM");
+      setManualStart("");
+      setManualEnd("");
+      setManualQuery("");
+      setError(null);
+    } else {
+      void mapEntities(session.documentId, nextEntities)
+        .then((response) => {
+          setMappedEntities(response.mappedEntities);
+          setManualText("");
+          setManualLabel("CUSTOM");
+          setManualStart("");
+          setManualEnd("");
+          setManualQuery("");
+          setError(null);
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Failed to map manual redaction.");
+        });
+    }
   };
 
   const captureSelection = () => {
@@ -227,13 +238,21 @@ function ReviewContent() {
     setIsRedacting(true);
     try {
       const [result] = await Promise.all([
-        redactPdf(session.documentId, session.entities),
+        isTextMode
+          ? redactText(session.text, session.entities)
+          : redactPdf(session.documentId, session.entities),
         new Promise((resolve) => window.setTimeout(resolve, MIN_LOADING_MS)),
       ]);
       setResult(result);
       router.push("/result");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to redact PDF.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : isTextMode
+            ? "Failed to redact text."
+            : "Failed to redact PDF."
+      );
       setIsRedacting(false);
     }
   };
@@ -243,12 +262,24 @@ function ReviewContent() {
       {isRedacting ? (
         <LoadingScreen
           title="Applying redactions"
-          subtitle="Mapping approved entities back to the PDF and generating the final redacted document."
-          steps={[
-            "Locking approved selections",
-            "Mapping text spans to page regions",
-            "Rendering the final redacted PDF",
-          ]}
+          subtitle={
+            isTextMode
+              ? "Building redacted text from your approved entity selections."
+              : "Mapping approved entities back to the PDF and generating the final redacted document."
+          }
+          steps={
+            isTextMode
+              ? [
+                  "Locking approved selections",
+                  "Merging overlapping spans",
+                  "Generating redacted text",
+                ]
+              : [
+                  "Locking approved selections",
+                  "Mapping text spans to page regions",
+                  "Rendering the final redacted PDF",
+                ]
+          }
         />
       ) : null}
       <div className="review-shell">
@@ -284,8 +315,8 @@ function ReviewContent() {
                 <span>Review</span>
               </a>
               <a className="workflow-link" href="/result">
-                <span className="workflow-icon">DL</span>
-                <span>Download</span>
+                <span className="workflow-icon">RS</span>
+                <span>Result</span>
               </a>
             </nav>
           </aside>
@@ -304,44 +335,53 @@ function ReviewContent() {
 
                   <h1>Review Detected Content</h1>
                   <p className="document-meta">
-                    {session.filename} - {session.pageCount} page{session.pageCount === 1 ? "" : "s"}
+                    {isTextMode
+                      ? `${session.filename} — plain text input`
+                      : `${session.filename} · ${session.pageCount} page${session.pageCount === 1 ? "" : "s"}`}
                   </p>
 
-                  <div className="pdf-preview-frame">
-                    {pagePreview ? (
-                      <div
-                        className="pdf-preview-page"
-                        style={{
-                          aspectRatio: `${pagePreview.width} / ${pagePreview.height}`,
-                          width: `${zoom}%`,
-                        }}
-                      >
-                        <img
-                          src={pagePreview.imageUrl}
-                          alt={`Preview of page ${currentPage + 1}`}
-                          className="pdf-preview-image"
-                        />
-                        {overlayRects.map((entity) => {
-                          const [x0, y0, x1, y1] = entity.rect;
-                          return (
-                            <div
-                              key={`${entity.label}-${entity.start}-${entity.end}-${x0}-${y0}`}
-                              className="pdf-overlay-rect"
-                              title={`${entity.label}: ${entity.text}`}
-                              style={{
-                                left: `${(x0 / pagePreview.width) * 100}%`,
-                                top: `${(y0 / pagePreview.height) * 100}%`,
-                                width: `${((x1 - x0) / pagePreview.width) * 100}%`,
-                                height: `${((y1 - y0) / pagePreview.height) * 100}%`,
-                              }}
-                            />
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="pdf-preview-empty">No page preview available.</div>
-                    )}
-                  </div>
+                  {!isTextMode ? (
+                    <div className="pdf-preview-frame">
+                      {pagePreview ? (
+                        <div
+                          className="pdf-preview-page"
+                          style={{
+                            aspectRatio: `${pagePreview.width} / ${pagePreview.height}`,
+                            width: `${zoom}%`,
+                          }}
+                        >
+                          <img
+                            src={pagePreview.imageUrl}
+                            alt={`Preview of page ${currentPage + 1}`}
+                            className="pdf-preview-image"
+                          />
+                          {overlayRects.map((entity) => {
+                            const [x0, y0, x1, y1] = entity.rect;
+                            return (
+                              <div
+                                key={`${entity.label}-${entity.start}-${entity.end}-${x0}-${y0}`}
+                                className="pdf-overlay-rect"
+                                title={`${entity.label}: ${entity.text}`}
+                                style={{
+                                  left: `${(x0 / pagePreview.width) * 100}%`,
+                                  top: `${(y0 / pagePreview.height) * 100}%`,
+                                  width: `${((x1 - x0) / pagePreview.width) * 100}%`,
+                                  height: `${((y1 - y0) / pagePreview.height) * 100}%`,
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="pdf-preview-empty">No page preview available.</div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-mode-preview-note">
+                      PDF page preview is not available for pasted text. Use the extracted text below
+                      to select spans and add manual redactions.
+                    </p>
+                  )}
 
                   <div className="document-copy">
                     <div className="document-copy-head">
@@ -491,42 +531,46 @@ function ReviewContent() {
           </main>
         </div>
 
-        <div className="floating-toolbar">
-          <div className="toolbar-group">
-            <button type="button" onClick={() => setZoom((value) => Math.min(180, value + 10))}>
-              +
-            </button>
-            <span>{zoom}%</span>
-            <button type="button" onClick={() => setZoom((value) => Math.max(70, value - 10))}>
-              -
-            </button>
+        {!isTextMode && pagePreview ? (
+          <div className="floating-toolbar">
+            <div className="toolbar-group">
+              <button type="button" onClick={() => setZoom((value) => Math.min(180, value + 10))}>
+                +
+              </button>
+              <span>{zoom}%</span>
+              <button type="button" onClick={() => setZoom((value) => Math.max(70, value - 10))}>
+                -
+              </button>
+            </div>
+            <div className="toolbar-group">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.max(0, page - 1))}
+              >
+                {"<"}
+              </button>
+              <span>
+                Page {currentPage + 1} of {session.pageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(session.pageCount - 1, page + 1))
+                }
+              >
+                {">"}
+              </button>
+            </div>
+            <div className="toolbar-group">
+              <button type="button" onClick={() => setCurrentPage(0)}>
+                First
+              </button>
+              <button type="button" onClick={() => setZoom(100)}>
+                Reset
+              </button>
+            </div>
           </div>
-          <div className="toolbar-group">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.max(0, page - 1))}
-            >
-              {"<"}
-            </button>
-            <span>Page {currentPage + 1} of {session.pageCount}</span>
-            <button
-              type="button"
-              onClick={() =>
-                setCurrentPage((page) => Math.min(session.pageCount - 1, page + 1))
-              }
-            >
-              {">"}
-            </button>
-          </div>
-          <div className="toolbar-group">
-            <button type="button" onClick={() => setCurrentPage(0)}>
-              First
-            </button>
-            <button type="button" onClick={() => setZoom(100)}>
-              Reset
-            </button>
-          </div>
-        </div>
+        ) : null}
       </div>
     </>
   );
