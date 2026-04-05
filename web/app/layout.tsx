@@ -4,7 +4,10 @@ import { SessionProvider } from "../lib/session";
 
 export const metadata: Metadata = {
   title: "Redactinator",
-  description: "Secure document redaction landing page"
+  description: "Secure document redaction landing page",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
