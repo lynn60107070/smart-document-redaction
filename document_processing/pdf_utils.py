@@ -14,11 +14,17 @@ from typing import Iterable, List, Sequence, Tuple, Union, IO
 import fitz  # PyMuPDF
 
 try:
-    from utils.constants import PAGE_SEPARATOR, LINE_MERGE_TOLERANCE, LINE_MERGE_X_GAP
+    from utils.constants import (
+        PAGE_SEPARATOR,
+        LINE_MERGE_TOLERANCE,
+        LINE_MERGE_X_GAP,
+        REDACTION_Y_INSET,
+    )
 except Exception:
     PAGE_SEPARATOR = "\n\n"
     LINE_MERGE_TOLERANCE = 2.0
     LINE_MERGE_X_GAP = 2.0
+    REDACTION_Y_INSET = 1.25
 
 
 RectTuple = Tuple[float, float, float, float]
@@ -86,7 +92,13 @@ def merge_rects(
     y_tolerance: float = LINE_MERGE_TOLERANCE,
     x_gap: float = LINE_MERGE_X_GAP,
 ) -> List[RectTuple]:
-    """Merge rectangles on the same line if they overlap or are close."""
+    """Merge rectangles on the same line if they overlap or are close.
+
+    Horizontally adjacent boxes are unioned on x. Vertically, word boxes from
+    PyMuPDF are often taller than the ink; taking the **intersection** of y
+    ranges while merging keeps the redaction band tight so it does not cover
+    neighbouring lines. If intervals do not overlap, y falls back to union.
+    """
 
     if not rects:
         return []
@@ -94,16 +106,48 @@ def merge_rects(
     sorted_rects = sorted(rects, key=lambda r: (r[1], r[0]))
     merged: List[RectTuple] = []
 
+    def _merge_y_union(a: RectTuple, b: RectTuple) -> Tuple[float, float]:
+        return (min(a[1], b[1]), max(a[3], b[3]))
+
+    def _merge_y_intersect(a: RectTuple, b: RectTuple) -> Tuple[float, float] | None:
+        y0 = max(a[1], b[1])
+        y1 = min(a[3], b[3])
+        if y1 > y0:
+            return (y0, y1)
+        return None
+
     current = list(sorted_rects[0])
     for rect in sorted_rects[1:]:
         if is_same_line(tuple(current), rect, y_tolerance) and rect[0] <= current[2] + x_gap:
             current[0] = min(current[0], rect[0])
-            current[1] = min(current[1], rect[1])
             current[2] = max(current[2], rect[2])
-            current[3] = max(current[3], rect[3])
+            iy = _merge_y_intersect(tuple(current), rect)
+            if iy is not None:
+                current[1], current[3] = iy
+            else:
+                current[1], current[3] = _merge_y_union(tuple(current), rect)
         else:
             merged.append(tuple(current))  # type: ignore[arg-type]
             current = list(rect)
 
     merged.append(tuple(current))  # type: ignore[arg-type]
     return merged
+
+
+def inset_redaction_rect_y(
+    rect: RectTuple,
+    inset: float = REDACTION_Y_INSET,
+    min_height: float = 1.0,
+) -> RectTuple:
+    """Narrow a redaction box vertically (PDF space, y grows downward)."""
+
+    if inset <= 0:
+        return rect
+    x0, y0, x1, y1 = rect
+    ny0 = y0 + inset
+    ny1 = y1 - inset
+    if ny1 - ny0 >= min_height:
+        return (x0, ny0, x1, ny1)
+    mid = 0.5 * (y0 + y1)
+    half = max(min_height * 0.5, (y1 - y0) * 0.5 * 0.35)
+    return (x0, mid - half, x1, mid + half)

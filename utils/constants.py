@@ -6,3 +6,6 @@ PAGE_SEPARATOR = "\n\n"
 # ``entity_mapper.merge_rects`` / pdf_utils: merge word boxes on the same line if this close (PDF units).
 LINE_MERGE_TOLERANCE = 2.0
 LINE_MERGE_X_GAP = 2.0
+
+# Shrink each redaction box vertically (PDF points) so burn-in black fill does not bleed into adjacent lines.
+REDACTION_Y_INSET = 1.25

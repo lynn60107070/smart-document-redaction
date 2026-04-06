@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List, Sequence
 
-from .pdf_utils import ExtractedDocument, RectTuple, merge_rects
+from .pdf_utils import ExtractedDocument, RectTuple, inset_redaction_rect_y, merge_rects
 
 
 def map_entities(
@@ -53,10 +53,11 @@ def map_entities(
 
         for page_index, rects in hits_by_page.items():
             for rect in merge_rects(rects, y_tolerance=y_tolerance, x_gap=x_gap):
+                tight = inset_redaction_rect_y(rect)
                 mapped.append(
                     {
                         "page": page_index,
-                        "rect": rect,
+                        "rect": tight,
                         "label": label,
                         "text": text,
                     }
