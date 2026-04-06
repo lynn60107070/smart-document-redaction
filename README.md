@@ -12,6 +12,11 @@
 **Stack:** **Next.js** frontend · **FastAPI** API · **spaCy** NER · **PyMuPDF** for PDF text/geometry/redaction.
 
 ---
+# Click to Watch The Demo Video
+[![Demo Video](https://img.youtube.com/vi/vUTG6TlTZNg/maxresdefault.jpg)](https://youtu.be/vUTG6TlTZNg)
+
+
+---
 
 ## Problem and motivation
 
